@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: secret
+    ports:
+      - 5432:5432
+    volumes:
+      - fundmate-test-data:/var/lib/postgresql/data
+
+volumes:
+  fundmate-test-data:
