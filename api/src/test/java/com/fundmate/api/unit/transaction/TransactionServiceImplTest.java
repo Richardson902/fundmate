@@ -6,6 +6,7 @@ import com.fundmate.api.mapper.TransactionMapper;
 import com.fundmate.api.model.Account;
 import com.fundmate.api.model.Category;
 import com.fundmate.api.model.Transaction;
+import com.fundmate.api.model.User;
 import com.fundmate.api.repository.AccountRepository;
 import com.fundmate.api.repository.CategoryRepository;
 import com.fundmate.api.repository.TransactionRepository;
@@ -16,6 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -42,6 +46,12 @@ class TransactionServiceImplTest {
     @Mock
     private TransactionMapper transactionMapper;
 
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -50,15 +60,21 @@ class TransactionServiceImplTest {
     private TransactionResponse transactionResponse;
     private Account account;
     private Category category;
+    private User user;
 
     @BeforeEach
     void setUp() {
+        user = new User();
+        user.setId(1L);
+
         account = new Account();
         account.setId(1L);
         account.setBalance(1000.0);
+        account.setUser(user);
 
         category = new Category();
         category.setId(1L);
+        category.setUser(user);
 
         transactionRequest = new TransactionRequest();
         transactionRequest.setAmount(100.0);
@@ -85,8 +101,15 @@ class TransactionServiceImplTest {
         transactionResponse.setNote("Test Note");
     }
 
+    private void setupSecurityContext() {
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user);
+    }
+
     @Test
     void createTransaction_ShouldCreateAndReturnTransaction() {
+        setupSecurityContext();
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(transactionMapper.toEntity(transactionRequest)).thenReturn(transaction);
@@ -103,8 +126,28 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    void createTransaction_WithInvalidAccount_ShouldThrowException() {
-        when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+    void createTransaction_WithUnauthorizedAccount_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+
+        assertThrows(ResponseStatusException.class, () ->
+                transactionService.createTransaction(transactionRequest));
+    }
+
+    @Test
+    void createTransaction_WithUnauthorizedCategory_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        category.setUser(otherUser);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
 
         assertThrows(ResponseStatusException.class, () ->
                 transactionService.createTransaction(transactionRequest));
@@ -112,7 +155,9 @@ class TransactionServiceImplTest {
 
     @Test
     void getTransactionsByAccountId_ShouldReturnList() {
-        when(transactionRepository.findByAccountId(1L)).thenReturn(Arrays.asList(transaction));
+        setupSecurityContext();
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(transactionRepository.findByAccountIdOrderByDateDesc(1L)).thenReturn(Arrays.asList(transaction));
         when(transactionMapper.toResponse(transaction)).thenReturn(transactionResponse);
 
         List<TransactionResponse> result = transactionService.getTransactionByAccountId(1L);
@@ -120,15 +165,30 @@ class TransactionServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(transactionResponse, result.get(0));
-        verify(transactionRepository).findByAccountId(1L);
+        verify(transactionRepository).findByAccountIdOrderByDateDesc(1L);
+    }
+
+    @Test
+    void getTransactionsByAccountId_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        assertThrows(ResponseStatusException.class, () ->
+                transactionService.getTransactionByAccountId(1L));
     }
 
     @Test
     void getTransactionsByDateRange_ShouldReturnList() {
+        setupSecurityContext();
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = LocalDate.now().plusDays(7);
 
-        when(transactionRepository.findByAccountIdAndDateBetween(1L, startDate, endDate))
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(transactionRepository.findByAccountIdAndDateBetweenOrderByDateDesc(1L, startDate, endDate))
                 .thenReturn(Arrays.asList(transaction));
         when(transactionMapper.toResponse(transaction)).thenReturn(transactionResponse);
 
@@ -138,11 +198,25 @@ class TransactionServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(transactionResponse, result.get(0));
-        verify(transactionRepository).findByAccountIdAndDateBetween(1L, startDate, endDate);
+        verify(transactionRepository).findByAccountIdAndDateBetweenOrderByDateDesc(1L, startDate, endDate);
+    }
+
+    @Test
+    void getTransactionsByDateRange_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        assertThrows(ResponseStatusException.class, () ->
+                transactionService.getTransactionsByDateRange(1L, LocalDate.now(), LocalDate.now().plusDays(7)));
     }
 
     @Test
     void updateTransaction_ShouldUpdateAndReturnTransaction() {
+        setupSecurityContext();
         when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
@@ -158,7 +232,21 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    void updateTransaction_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
+
+        assertThrows(ResponseStatusException.class, () ->
+                transactionService.updateTransaction(1L, transactionRequest));
+    }
+
+    @Test
     void deleteTransaction_ShouldDeleteAndUpdateBalance() {
+        setupSecurityContext();
         when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
 
         transactionService.deleteTransaction(1L);
@@ -168,8 +256,13 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    void deleteTransaction_WithInvalidId_ShouldThrowException() {
-        when(transactionRepository.findById(1L)).thenReturn(Optional.empty());
+    void deleteTransaction_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
 
         assertThrows(ResponseStatusException.class, () ->
                 transactionService.deleteTransaction(1L));

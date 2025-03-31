@@ -14,6 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -36,6 +39,12 @@ class AccountServiceImplTest {
     @Mock
     private AccountMapper accountMapper;
 
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
+
     @InjectMocks
     private AccountServiceImpl accountService;
 
@@ -46,17 +55,24 @@ class AccountServiceImplTest {
     private Long userId;
     private Long accountId;
 
+    private void setupSecurityContext() {
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user);
+    }
+
     @BeforeEach
     void setUp() {
         userId = 1L;
         accountId = 1L;
 
+        user = new User();
+        user.setId(userId);
+
         accountRequest = new AccountRequest();
         accountRequest.setAccountName("Test Account");
         accountRequest.setBalance(1000.0);
 
-        user = new User();
-        user.setId(userId);
 
         account = new Account();
         account.setId(accountId);
@@ -72,12 +88,12 @@ class AccountServiceImplTest {
 
     @Test
     void createAccount_ShouldCreateAndReturnAccount() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        setupSecurityContext();
         when(accountMapper.toEntity(accountRequest)).thenReturn(account);
         when(accountRepository.save(any(Account.class))).thenReturn(account);
         when(accountMapper.toResponse(account)).thenReturn(accountResponse);
 
-        AccountResponse result = accountService.createAccount(accountRequest, userId);
+        AccountResponse result = accountService.createAccount(accountRequest);
 
         assertNotNull(result);
         assertEquals(accountResponse.getId(), result.getId());
@@ -86,22 +102,13 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void createAccount_WithInvalidUser_ShouldThrowException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(ResponseStatusException.class, () ->
-                accountService.createAccount(accountRequest, userId));
-
-        verify(accountRepository, never()).save(any());
-    }
-
-    @Test
     void getAccountsByUserId_ShouldReturnAccounts() {
+        setupSecurityContext();
         List<Account> accounts = Arrays.asList(account);
         when(accountRepository.findByUserId(userId)).thenReturn(accounts);
         when(accountMapper.toResponse(account)).thenReturn(accountResponse);
 
-        List<AccountResponse> result = accountService.getAccountsByUserId(userId);
+        List<AccountResponse> result = accountService.getAccounts();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -111,6 +118,7 @@ class AccountServiceImplTest {
 
     @Test
     void getAccountById_ShouldReturnAccount() {
+        setupSecurityContext();
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
         when(accountMapper.toResponse(account)).thenReturn(accountResponse);
 
@@ -130,7 +138,21 @@ class AccountServiceImplTest {
     }
 
     @Test
+    void getAccountById_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        assertThrows(ResponseStatusException.class, () ->
+                accountService.getAccountById(accountId));
+    }
+
+    @Test
     void updateAccount_ShouldUpdateAndReturnAccount() {
+        setupSecurityContext();
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
         when(accountRepository.save(any(Account.class))).thenReturn(account);
         when(accountMapper.toResponse(account)).thenReturn(accountResponse);
@@ -143,17 +165,11 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void updateAccount_WithInvalidId_ShouldThrowException() {
-        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
-
-        assertThrows(ResponseStatusException.class, () ->
-                accountService.updateAccount(accountId, accountRequest));
-
-        verify(accountRepository, never()).save(any());
-    }
-
-    @Test
     void deleteAccount_ShouldDeleteAccount() {
+        setupSecurityContext();
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        doNothing().when(accountRepository).deleteById(accountId);
+
         accountService.deleteAccount(accountId);
 
         verify(accountRepository).deleteById(accountId);

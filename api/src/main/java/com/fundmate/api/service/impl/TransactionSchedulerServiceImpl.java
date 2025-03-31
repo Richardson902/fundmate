@@ -49,18 +49,18 @@ public class TransactionSchedulerServiceImpl implements TransactionSchedulerServ
 
     @Override
     public boolean isTransactionDue(ScheduledTransaction scheduledTransaction, LocalDate today) {
-        if (scheduledTransaction.getStartDate().isAfter(today) || scheduledTransaction.getOccurrences() <= 0) {
+        if (scheduledTransaction.getExecutionDate().isAfter(today) || scheduledTransaction.getOccurrences() <= 0) {
             return false;
         }
 
-        long daysBetween = ChronoUnit.DAYS.between(scheduledTransaction.getStartDate(), today);
+        long daysBetween = ChronoUnit.DAYS.between(scheduledTransaction.getExecutionDate(), today);
 
         return switch (scheduledTransaction.getRecurrenceType()) {
             case DAILY -> daysBetween % scheduledTransaction.getRecurrenceInterval() == 0;
             case WEEKLY -> daysBetween % (7L * scheduledTransaction.getRecurrenceInterval()) == 0;
-            case MONTHLY -> scheduledTransaction.getStartDate().getDayOfMonth() == today.getDayOfMonth() &&
+            case MONTHLY -> scheduledTransaction.getExecutionDate().getDayOfMonth() == today.getDayOfMonth() &&
                     daysBetween >= 28L * scheduledTransaction.getRecurrenceInterval();
-            case YEARLY -> scheduledTransaction.getStartDate().getDayOfYear() == today.getDayOfYear() &&
+            case YEARLY -> scheduledTransaction.getExecutionDate().getDayOfYear() == today.getDayOfYear() &&
                     daysBetween >= 365L * scheduledTransaction.getRecurrenceInterval();
         };
     }
@@ -77,6 +77,9 @@ public class TransactionSchedulerServiceImpl implements TransactionSchedulerServ
 
         Account account = scheduledTransaction.getAccount();
         account.setBalance(account.getBalance() + scheduledTransaction.getAmount());
+
+        scheduledTransaction.setExecutionDate(LocalDate.now());
+        scheduledTransactionRepository.save(scheduledTransaction);
 
         accountRepository.save(account);
         transactionRepository.save(transaction);

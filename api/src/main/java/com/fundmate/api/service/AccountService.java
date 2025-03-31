@@ -6,8 +6,8 @@ import com.fundmate.api.dto.response.AccountResponse;
 import java.util.List;
 
 public interface AccountService {
-    AccountResponse createAccount(AccountRequest accountRequest, Long userId);
-    List<AccountResponse> getAccountsByUserId(Long userId);
+    AccountResponse createAccount(AccountRequest accountRequest);
+    List<AccountResponse> getAccounts();
     AccountResponse getAccountById(Long accountId);
     AccountResponse updateAccount(Long accountId, AccountRequest accountRequest);
     void deleteAccount(Long accountId);

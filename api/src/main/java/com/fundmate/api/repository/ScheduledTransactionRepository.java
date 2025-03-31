@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ScheduledTransactionRepository extends JpaRepository<ScheduledTransaction, Long> {
     List<ScheduledTransaction> findByAccountId(Long accountId);
+    boolean existsByCategoryId(Long categoryId);
 }

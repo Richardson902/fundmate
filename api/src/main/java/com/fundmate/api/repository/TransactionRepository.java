@@ -9,8 +9,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByAccountId(Long accountId);
-    List<Transaction> findByAccountIdAndDateBetween(Long accountId, LocalDate startDate, LocalDate endDate);
+    List<Transaction> findByAccountIdOrderByDateDesc(Long accountId);
+    List<Transaction> findByAccountIdAndDateBetweenOrderByDateDesc(
+            Long accountId, LocalDate startDate, LocalDate endDate);
     boolean existsByCategoryId(Long categoryId);
 
     @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.account.id = :accountId " +

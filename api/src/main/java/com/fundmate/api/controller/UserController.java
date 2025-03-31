@@ -1,6 +1,8 @@
 package com.fundmate.api.controller;
 
+import com.fundmate.api.dto.request.AuthRequest;
 import com.fundmate.api.dto.request.UserRequest;
+import com.fundmate.api.dto.response.AuthResponse;
 import com.fundmate.api.dto.response.UserResponse;
 import com.fundmate.api.service.UserService;
 import jakarta.validation.Valid;
@@ -25,5 +27,10 @@ public class UserController {
     public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest userRequest) {
         UserResponse createdUser = userService.registerUser(userRequest);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
+        return ResponseEntity.ok(userService.authenticate(request));
     }
 }

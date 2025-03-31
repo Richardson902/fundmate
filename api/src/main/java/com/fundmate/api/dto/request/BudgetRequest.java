@@ -11,6 +11,6 @@ public class BudgetRequest {
     private Long categoryId;
     private Long accountId;
     private BudgetDuration duration;
-    private LocalDate startDate;
+    private LocalDate startDate; // unused, should remove but might keep for custom dates later
     private LocalDate endDate;
 }

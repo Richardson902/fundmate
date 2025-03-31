@@ -40,7 +40,7 @@ class ScheduledTransactionControllerTest {
         request.setAmount(100.0);
         request.setAccountId(1L);
         request.setCategoryId(1L);
-        request.setStartDate(LocalDate.now());
+        request.setExecutionDate(LocalDate.now());
         request.setRecurrenceType(RecurrenceType.MONTHLY);
         request.setRecurrenceInterval(1);
         request.setOccurrences(12);
@@ -50,7 +50,7 @@ class ScheduledTransactionControllerTest {
         response = new ScheduledTransactionResponse();
         response.setId(1L);
         response.setAmount(100.0);
-        response.setStartDate(LocalDate.now());
+        response.setExecutionDate(LocalDate.now());
         response.setRecurrenceType(RecurrenceType.MONTHLY);
         response.setRecurrenceInterval(1);
         response.setOccurrences(12);

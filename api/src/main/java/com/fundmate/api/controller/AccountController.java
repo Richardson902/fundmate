@@ -20,13 +20,13 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest, @RequestParam Long userId) {
-        return new ResponseEntity<>(accountService.createAccount(accountRequest, userId), HttpStatus.CREATED);
+    public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest) {
+        return new ResponseEntity<>(accountService.createAccount(accountRequest), HttpStatus.CREATED);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<AccountResponse>> getAccountsByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(accountService.getAccountsByUserId(userId));
+    @GetMapping
+    public ResponseEntity<List<AccountResponse>> getAccounts() {
+        return ResponseEntity.ok(accountService.getAccounts());
     }
 
     @GetMapping("/{id}")

@@ -6,11 +6,13 @@ import com.fundmate.api.mapper.ScheduledTransactionMapper;
 import com.fundmate.api.model.Account;
 import com.fundmate.api.model.Category;
 import com.fundmate.api.model.ScheduledTransaction;
+import com.fundmate.api.model.User;
 import com.fundmate.api.repository.AccountRepository;
 import com.fundmate.api.repository.CategoryRepository;
 import com.fundmate.api.repository.ScheduledTransactionRepository;
 import com.fundmate.api.service.ScheduledTransactionService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,6 +35,10 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
         this.scheduledTransactionMapper = scheduledTransactionMapper;
     }
 
+    private User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 
     @Override
     public ScheduledTransactionResponse createScheduledTransaction(ScheduledTransactionRequest scheduledTransactionRequest) {
@@ -41,7 +47,11 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
         Category category = categoryRepository.findById(scheduledTransactionRequest.getCategoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
-        if (scheduledTransactionRequest.getStartDate().isBefore(LocalDate.now())) {
+        if (!account.getUser().getId().equals(getCurrentUser().getId()) || !account.getUser().getId().equals(category.getUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        if (scheduledTransactionRequest.getExecutionDate().isBefore(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Start date must be today, or in the future");
         }
 
@@ -55,6 +65,13 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
 
     @Override
     public List<ScheduledTransactionResponse> getAllScheduledTransactionsByAccountId(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+
+        if (!account.getUser().getId().equals(getCurrentUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         return scheduledTransactionRepository.findByAccountId(accountId).stream()
                 .map(scheduledTransactionMapper::toResponse)
                 .collect(Collectors.toList());
@@ -64,6 +81,11 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     public ScheduledTransactionResponse getScheduledTransactionById(Long id) {
         ScheduledTransaction scheduledTransaction = scheduledTransactionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Scheduled transaction not found"));
+
+        if (!scheduledTransaction.getAccount().getUser().getId().equals(getCurrentUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         return scheduledTransactionMapper.toResponse(scheduledTransaction);
     }
 
@@ -71,6 +93,10 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     public void deleteScheduledTransaction(Long id) {
         ScheduledTransaction transaction = scheduledTransactionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Scheduled transaction not found"));
+
+        if (!transaction.getAccount().getUser().getId().equals(getCurrentUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
 
         scheduledTransactionRepository.delete(transaction);
 

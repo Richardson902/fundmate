@@ -21,7 +21,7 @@ public class ScheduledTransaction {
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
-    private LocalDate startDate;
+    private LocalDate executionDate;
     @Enumerated(EnumType.STRING)
     private RecurrenceType recurrenceType;
     private Integer recurrenceInterval;

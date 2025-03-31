@@ -10,7 +10,7 @@ public class ScheduledTransactionRequest {
     private Double amount;
     private Long categoryId;
     private Long accountId;
-    private LocalDate startDate;
+    private LocalDate executionDate;
     private RecurrenceType recurrenceType;
     private Integer recurrenceInterval;
     private Integer occurrences;

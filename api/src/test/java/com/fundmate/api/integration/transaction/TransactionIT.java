@@ -28,29 +28,11 @@ public class TransactionIT extends BaseIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        // Create user
-        UserRequest userRequest = new UserRequest();
-        userRequest.setEmail("test@example.com");
-        userRequest.setPassword("password123");
-
-        MvcResult userResult = mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        UserResponse userResponse = objectMapper.readValue(
-                userResult.getResponse().getContentAsString(),
-                UserResponse.class
-        );
-
-        // Create account
         AccountRequest accountRequest = new AccountRequest();
         accountRequest.setAccountName("Test Account");
         accountRequest.setBalance(1000.0);
 
-        MvcResult accountResult = mockMvc.perform(post("/api/accounts")
-                        .param("userId", userResponse.getId().toString())
+        MvcResult accountResult = mockMvc.perform(addAuth(post("/api/accounts"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(accountRequest)))
                 .andExpect(status().isCreated())
@@ -67,7 +49,7 @@ public class TransactionIT extends BaseIT {
         categoryRequest.setCategoryName("Groceries");
         categoryRequest.setIcon("grocery-icon");
 
-        MvcResult categoryResult = mockMvc.perform(post("/api/categories")
+        MvcResult categoryResult = mockMvc.perform(addAuth(post("/api/categories"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequest)))
                 .andExpect(status().isCreated())
@@ -90,7 +72,7 @@ public class TransactionIT extends BaseIT {
         request.setFromName("Grocery Store");
         request.setNote("Weekly groceries");
 
-        mockMvc.perform(post("/api/transactions")
+        mockMvc.perform(addAuth(post("/api/transactions"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -112,7 +94,7 @@ public class TransactionIT extends BaseIT {
         createRequest.setFromName("Grocery Store");
         createRequest.setNote("Weekly groceries");
 
-        MvcResult result = mockMvc.perform(post("/api/transactions")
+        MvcResult result = mockMvc.perform(addAuth(post("/api/transactions"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
@@ -132,7 +114,7 @@ public class TransactionIT extends BaseIT {
         updateRequest.setFromName("Updated Store");
         updateRequest.setNote("Updated note");
 
-        mockMvc.perform(put("/api/transactions/" + transactionId)
+        mockMvc.perform(addAuth(put("/api/transactions/" + transactionId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())

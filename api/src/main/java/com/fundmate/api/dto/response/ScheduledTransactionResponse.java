@@ -11,7 +11,7 @@ public class ScheduledTransactionResponse {
     private Double amount;
     private CategoryResponse category;
     private AccountResponse account;
-    private LocalDate startDate;
+    private LocalDate executionDate;
     private RecurrenceType recurrenceType;
     private Integer recurrenceInterval;
     private Integer occurrences;

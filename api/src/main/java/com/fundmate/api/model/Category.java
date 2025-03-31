@@ -15,4 +15,8 @@ public class Category {
     private String categoryName;
     private String icon;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
 }

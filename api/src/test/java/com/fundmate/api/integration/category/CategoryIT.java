@@ -17,9 +17,9 @@ public class CategoryIT extends BaseIT {
         request.setCategoryName("Groceries");
         request.setIcon("grocery-icon");
 
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(addAuth(post("/api/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.categoryName").value("Groceries"))
                 .andExpect(jsonPath("$.icon").value("grocery-icon"));
@@ -27,7 +27,7 @@ public class CategoryIT extends BaseIT {
 
     @Test
     void getAllCategories_ShouldReturnEmptyList() throws Exception {
-        mockMvc.perform(get("/api/categories"))
+        mockMvc.perform(addAuth(get("/api/categories")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());

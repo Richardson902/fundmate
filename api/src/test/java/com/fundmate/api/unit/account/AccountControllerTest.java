@@ -52,29 +52,29 @@ class AccountControllerTest {
 
     @Test
     void createAccount_ShouldReturnCreatedResponse() {
-        when(accountService.createAccount(any(AccountRequest.class), eq(userId)))
+        when(accountService.createAccount(any(AccountRequest.class)))
                 .thenReturn(accountResponse);
 
-        ResponseEntity<AccountResponse> response = accountController.createAccount(accountRequest, userId);
+        ResponseEntity<AccountResponse> response = accountController.createAccount(accountRequest);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(accountResponse, response.getBody());
-        verify(accountService).createAccount(accountRequest, userId);
+        verify(accountService).createAccount(accountRequest);
     }
 
     @Test
     void getAccountsByUserId_ShouldReturnListOfAccounts() {
         List<AccountResponse> accounts = Arrays.asList(accountResponse);
-        when(accountService.getAccountsByUserId(userId)).thenReturn(accounts);
+        when(accountService.getAccounts()).thenReturn(accounts);
 
-        ResponseEntity<List<AccountResponse>> response = accountController.getAccountsByUserId(userId);
+        ResponseEntity<List<AccountResponse>> response = accountController.getAccounts();
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(accounts, response.getBody());
         assertEquals(1, response.getBody().size());
-        verify(accountService).getAccountsByUserId(userId);
+        verify(accountService).getAccounts();
     }
 
     @Test

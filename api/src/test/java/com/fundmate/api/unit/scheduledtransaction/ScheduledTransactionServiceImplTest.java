@@ -3,10 +3,7 @@ package com.fundmate.api.unit.scheduledtransaction;
 import com.fundmate.api.dto.request.ScheduledTransactionRequest;
 import com.fundmate.api.dto.response.ScheduledTransactionResponse;
 import com.fundmate.api.mapper.ScheduledTransactionMapper;
-import com.fundmate.api.model.Account;
-import com.fundmate.api.model.Category;
-import com.fundmate.api.model.RecurrenceType;
-import com.fundmate.api.model.ScheduledTransaction;
+import com.fundmate.api.model.*;
 import com.fundmate.api.repository.AccountRepository;
 import com.fundmate.api.repository.CategoryRepository;
 import com.fundmate.api.repository.ScheduledTransactionRepository;
@@ -17,6 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -43,6 +43,12 @@ class ScheduledTransactionServiceImplTest {
     @Mock
     private ScheduledTransactionMapper scheduledTransactionMapper;
 
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
+
     @InjectMocks
     private ScheduledTransactionServiceImpl scheduledTransactionService;
 
@@ -51,23 +57,29 @@ class ScheduledTransactionServiceImplTest {
     private ScheduledTransactionResponse response;
     private Account account;
     private Category category;
+    private User user;
 
     @BeforeEach
     void setUp() {
+        user = new User();
+        user.setId(1L);
+
         account = new Account();
         account.setId(1L);
         account.setAccountName("Test Account");
         account.setBalance(1000.0);
+        account.setUser(user);
 
         category = new Category();
         category.setId(1L);
         category.setCategoryName("Test Category");
+        category.setUser(user);
 
         request = new ScheduledTransactionRequest();
         request.setAmount(100.0);
         request.setAccountId(1L);
         request.setCategoryId(1L);
-        request.setStartDate(LocalDate.now());
+        request.setExecutionDate(LocalDate.now());
         request.setRecurrenceType(RecurrenceType.MONTHLY);
         request.setRecurrenceInterval(1);
         request.setOccurrences(12);
@@ -79,7 +91,7 @@ class ScheduledTransactionServiceImplTest {
         scheduledTransaction.setAmount(100.0);
         scheduledTransaction.setAccount(account);
         scheduledTransaction.setCategory(category);
-        scheduledTransaction.setStartDate(LocalDate.now());
+        scheduledTransaction.setExecutionDate(LocalDate.now());
         scheduledTransaction.setRecurrenceType(RecurrenceType.MONTHLY);
         scheduledTransaction.setRecurrenceInterval(1);
         scheduledTransaction.setOccurrences(12);
@@ -89,7 +101,7 @@ class ScheduledTransactionServiceImplTest {
         response = new ScheduledTransactionResponse();
         response.setId(1L);
         response.setAmount(100.0);
-        response.setStartDate(LocalDate.now());
+        response.setExecutionDate(LocalDate.now());
         response.setRecurrenceType(RecurrenceType.MONTHLY);
         response.setRecurrenceInterval(1);
         response.setOccurrences(12);
@@ -97,8 +109,15 @@ class ScheduledTransactionServiceImplTest {
         response.setNote("Test Note");
     }
 
+    private void setupSecurityContext() {
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user);
+    }
+
     @Test
     void createScheduledTransaction_ShouldCreateAndReturnTransaction() {
+        setupSecurityContext();
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(scheduledTransactionMapper.toEntity(request)).thenReturn(scheduledTransaction);
@@ -115,8 +134,36 @@ class ScheduledTransactionServiceImplTest {
     }
 
     @Test
+    void createScheduledTransaction_WithUnauthorizedAccount_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+
+        assertThrows(ResponseStatusException.class, () ->
+                scheduledTransactionService.createScheduledTransaction(request));
+    }
+
+    @Test
+    void createScheduledTransaction_WithUnauthorizedCategory_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        category.setUser(otherUser);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+
+        assertThrows(ResponseStatusException.class, () ->
+                scheduledTransactionService.createScheduledTransaction(request));
+    }
+
+    @Test
     void createScheduledTransaction_WithPastDate_ShouldThrowException() {
-        request.setStartDate(LocalDate.now().minusDays(1));
+        request.setExecutionDate(LocalDate.now().minusDays(1));
 
         assertThrows(ResponseStatusException.class, () ->
                 scheduledTransactionService.createScheduledTransaction(request));
@@ -124,6 +171,8 @@ class ScheduledTransactionServiceImplTest {
 
     @Test
     void getAllScheduledTransactionsByAccountId_ShouldReturnList() {
+        setupSecurityContext();
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
         when(scheduledTransactionRepository.findByAccountId(1L))
                 .thenReturn(Arrays.asList(scheduledTransaction));
         when(scheduledTransactionMapper.toResponse(scheduledTransaction)).thenReturn(response);
@@ -138,7 +187,21 @@ class ScheduledTransactionServiceImplTest {
     }
 
     @Test
+    void getAllScheduledTransactionsByAccountId_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+
+        assertThrows(ResponseStatusException.class, () ->
+                scheduledTransactionService.getAllScheduledTransactionsByAccountId(1L));
+    }
+
+    @Test
     void getScheduledTransactionById_ShouldReturnTransaction() {
+        setupSecurityContext();
         when(scheduledTransactionRepository.findById(1L))
                 .thenReturn(Optional.of(scheduledTransaction));
         when(scheduledTransactionMapper.toResponse(scheduledTransaction)).thenReturn(response);
@@ -151,6 +214,20 @@ class ScheduledTransactionServiceImplTest {
     }
 
     @Test
+    void getScheduledTransactionById_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(scheduledTransactionRepository.findById(1L))
+                .thenReturn(Optional.of(scheduledTransaction));
+
+        assertThrows(ResponseStatusException.class, () ->
+                scheduledTransactionService.getScheduledTransactionById(1L));
+    }
+
+    @Test
     void getScheduledTransactionById_WithInvalidId_ShouldThrowException() {
         when(scheduledTransactionRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -160,12 +237,27 @@ class ScheduledTransactionServiceImplTest {
 
     @Test
     void deleteScheduledTransaction_ShouldDelete() {
+        setupSecurityContext();
         when(scheduledTransactionRepository.findById(1L))
                 .thenReturn(Optional.of(scheduledTransaction));
 
         scheduledTransactionService.deleteScheduledTransaction(1L);
 
         verify(scheduledTransactionRepository).delete(scheduledTransaction);
+    }
+
+    @Test
+    void deleteScheduledTransaction_WithUnauthorizedAccess_ShouldThrowException() {
+        setupSecurityContext();
+        User otherUser = new User();
+        otherUser.setId(2L);
+        account.setUser(otherUser);
+
+        when(scheduledTransactionRepository.findById(1L))
+                .thenReturn(Optional.of(scheduledTransaction));
+
+        assertThrows(ResponseStatusException.class, () ->
+                scheduledTransactionService.deleteScheduledTransaction(1L));
     }
 
     @Test

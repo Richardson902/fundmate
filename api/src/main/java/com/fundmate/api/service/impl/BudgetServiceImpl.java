@@ -6,15 +6,18 @@ import com.fundmate.api.mapper.BudgetMapper;
 import com.fundmate.api.model.Account;
 import com.fundmate.api.model.Budget;
 import com.fundmate.api.model.Category;
+import com.fundmate.api.model.User;
 import com.fundmate.api.repository.AccountRepository;
 import com.fundmate.api.repository.BudgetRepository;
 import com.fundmate.api.repository.CategoryRepository;
 import com.fundmate.api.repository.TransactionRepository;
 import com.fundmate.api.service.BudgetService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +38,10 @@ public class BudgetServiceImpl implements BudgetService {
         this.budgetMapper = budgetMapper;
     }
 
+    private User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
     @Override
     public BudgetResponse createBudget(BudgetRequest budgetRequest) {
         Budget budget = budgetMapper.toEntity(budgetRequest);
@@ -45,15 +52,40 @@ public class BudgetServiceImpl implements BudgetService {
         Category category = categoryRepository.findById(budgetRequest.getCategoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
+        if (!account.getUser().getId().equals(getCurrentUser().getId()) || !category.getUser().getId().equals(getCurrentUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         budget.setAccount(account);
         budget.setCategory(category);
+        setDatesByDuration(budget, budgetRequest);
 
         Budget savedBudget = budgetRepository.save(budget);
         return budgetMapper.toResponse(savedBudget);
     }
 
+    private void setDatesByDuration(Budget budget, BudgetRequest request) {
+        LocalDate startDate = LocalDate.now();
+        budget.setStartDate(startDate);
+
+        LocalDate endDate = switch (request.getDuration()) {
+            case ONE_WEEK -> startDate.plusWeeks(1);
+            case ONE_MONTH -> startDate.plusMonths(1);
+            case ONE_YEAR -> startDate.plusYears(1);
+        };
+
+        budget.setEndDate(endDate);
+    }
+
     @Override
     public List<BudgetResponse> getBudgetsByAccountId(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+
+        if (!account.getUser().getId().equals(getCurrentUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         return budgetRepository.findByAccountId(accountId).stream()
                 .map(this::enrichBudgetResponse)
                 .collect(Collectors.toList());
@@ -63,11 +95,23 @@ public class BudgetServiceImpl implements BudgetService {
     public BudgetResponse getBudgetById(Long id) {
         Budget budget = budgetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Budget not found"));
+
+        if (!budget.getAccount().getUser().getId().equals(getCurrentUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         return enrichBudgetResponse(budget);
     }
 
     @Override
     public void deleteBudget(Long id) {
+        Budget budget = budgetRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Budget not found"));
+
+        if (!budget.getAccount().getUser().getId().equals(getCurrentUser().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         budgetRepository.deleteById(id);
     }
 

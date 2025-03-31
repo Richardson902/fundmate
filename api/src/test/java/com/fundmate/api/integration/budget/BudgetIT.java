@@ -5,10 +5,13 @@ import com.fundmate.api.dto.response.AccountResponse;
 import com.fundmate.api.dto.response.CategoryResponse;
 import com.fundmate.api.dto.response.UserResponse;
 import com.fundmate.api.integration.BaseIT;
+import com.fundmate.api.model.BudgetDuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,29 +24,11 @@ public class BudgetIT extends BaseIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        // Create user
-        UserRequest userRequest = new UserRequest();
-        userRequest.setEmail("test@example.com");
-        userRequest.setPassword("password123");
-
-        MvcResult userResult = mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        UserResponse userResponse = objectMapper.readValue(
-                userResult.getResponse().getContentAsString(),
-                UserResponse.class
-        );
-
-        // Create account
         AccountRequest accountRequest = new AccountRequest();
         accountRequest.setAccountName("Test Account");
         accountRequest.setBalance(1000.0);
 
-        MvcResult accountResult = mockMvc.perform(post("/api/accounts")
-                        .param("userId", userResponse.getId().toString())
+        MvcResult accountResult = mockMvc.perform(addAuth(post("/api/accounts"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(accountRequest)))
                 .andExpect(status().isCreated())
@@ -60,7 +45,7 @@ public class BudgetIT extends BaseIT {
         categoryRequest.setCategoryName("Groceries");
         categoryRequest.setIcon("grocery-icon");
 
-        MvcResult categoryResult = mockMvc.perform(post("/api/categories")
+        MvcResult categoryResult = mockMvc.perform(addAuth(post("/api/categories"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequest)))
                 .andExpect(status().isCreated())
@@ -79,13 +64,19 @@ public class BudgetIT extends BaseIT {
         request.setAccountId(accountId);
         request.setCategoryId(categoryId);
         request.setAmount(500.0);
+        request.setDuration(BudgetDuration.ONE_MONTH);
 
-        mockMvc.perform(post("/api/budgets")
+        LocalDate today = LocalDate.now();
+
+        mockMvc.perform(addAuth(post("/api/budgets"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.amount").value(500.0))
-                .andExpect(jsonPath("$.accountId").value(accountId))
-                .andExpect(jsonPath("$.categoryId").value(categoryId));
+                .andExpect(jsonPath("$.account.id").value(accountId))
+                .andExpect(jsonPath("$.category.id").value(categoryId))
+                .andExpect(jsonPath("$.duration").value("ONE_MONTH"))
+                .andExpect(jsonPath("$.startDate").value(today.toString()))
+                .andExpect(jsonPath("$.endDate").value(today.plusMonths(1).toString()));
     }
 }
