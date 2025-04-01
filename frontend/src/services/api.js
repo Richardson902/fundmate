@@ -15,19 +15,29 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Auth errors
-    if (error.response?.status === 401) {
+    // Registration errors
+    if (error.config.url === "/auth/register") {
+      return Promise.reject(
+        new Error(error.response?.data?.message || "Registration failed")
+      );
+    }
+
+    // Invalid credentials for login attempt
+    if (
+      error.response?.status === 403 &&
+      error.config.url === "/auth/authenticate"
+    ) {
+      return Promise.reject(new Error("Invalid email or password"));
+    }
+
+    // Auth errors handle 401 and 403 except for login/register
+    if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem("token");
       window.location.href = "/login";
       return Promise.reject(new Error("Please login again"));
     }
 
-    // Invalid credentials
-    if (error.response?.status === 403) {
-      return Promise.reject(new Error("Invalid email or password"));
-    }
-
-    // Email exists
+    // Email exists conflict
     if (error.response?.status === 409) {
       return Promise.reject(new Error("Email already exists"));
     }
