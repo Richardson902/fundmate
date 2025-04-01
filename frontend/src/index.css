@@ -9,10 +9,11 @@
   --fm-light: #f8f9fa; /* Light background */
   --fm-dark: #1f2937; /* Dark text/background */
   --fm-gray: #6c757d; /* Neutral text */
+  --fm-breaks: #e8e4e4; /* Line breaks */
 
   /* Background and Text */
-  --fm-bg-primary: #ffffff;
-  --fm-bg-secondary: #f3f4f6;
+  --fm-bg-primary: #f1f1f1;
+  --fm-bg-secondary: #ffffff;
   --fm-text-primary: #1f2937;
   --fm-text-secondary: #4b5563;
 
