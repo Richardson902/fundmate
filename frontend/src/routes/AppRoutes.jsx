@@ -10,6 +10,7 @@ import Accounts from "../pages/Accounts";
 import Budgets from "../pages/Budgets";
 import ScheduledTransactions from "../pages/ScheduledTransactions";
 import Transactions from "../pages/Transactions";
+import { AccountProvider } from "../contexts/AccountContext";
 
 function AppRoutes() {
   return (
@@ -19,7 +20,13 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
 
       <Route element={<ProtectedRoute />}>
-        <Route element={<Layout />}>
+        <Route
+          element={
+            <AccountProvider>
+              <Layout />
+            </AccountProvider>
+          }
+        >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route
