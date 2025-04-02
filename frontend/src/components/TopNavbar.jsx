@@ -1,4 +1,6 @@
 import { useLocation } from "react-router-dom";
+import { Navbar, Container } from "react-bootstrap";
+import { List } from "react-bootstrap-icons";
 
 function TopNavbar({ toggleSidebar }) {
   const location = useLocation();
@@ -14,20 +16,20 @@ function TopNavbar({ toggleSidebar }) {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg top-navbar">
-      <div className="container-fluid">
+    <Navbar expand="lg" className="top-navbar">
+      <Container fluid>
         <div className="d-flex align-items-center">
           <button
             className="sidebar-toggle"
             onClick={toggleSidebar}
             aria-label="Toggle Sidebar"
           >
-            ☰
+            <List size={24} />
           </button>
-          <span className="navbar-brand ms-3 mb-0 h1">{getPageTitle()}</span>
+          <Navbar.Brand className="ms-3 mb-0">{getPageTitle()}</Navbar.Brand>
         </div>
-      </div>
-    </nav>
+      </Container>
+    </Navbar>
   );
 }
 

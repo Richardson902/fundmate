@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { Nav } from "react-bootstrap";
 
 function Sidebar({ isOpen }) {
   const location = useLocation();
@@ -21,20 +22,19 @@ function Sidebar({ isOpen }) {
       <div className="header-section">
         <span className="brand">FundMate</span>
       </div>
-      <ul className="nav nav-pills flex-column mb-auto p-3">
+      <Nav className="flex-column p-3">
         {menuItems.map((item) => (
-          <li key={item.path} className="nav-item">
-            <Link
+          <Nav.Item key={item.path}>
+            <Nav.Link
+              as={Link}
               to={item.path}
-              className={`nav-link ${
-                location.pathname === item.path ? "active" : ""
-              }`}
+              active={location.pathname === item.path}
             >
               {item.name}
-            </Link>
-          </li>
+            </Nav.Link>
+          </Nav.Item>
         ))}
-      </ul>
+      </Nav>
     </div>
   );
 }

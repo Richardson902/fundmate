@@ -1,11 +1,29 @@
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 import "../styles/layout.css";
 
 function Layout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setIsSidebarOpen(false);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
