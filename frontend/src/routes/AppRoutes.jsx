@@ -11,6 +11,8 @@ import Budgets from "../pages/Budgets";
 import ScheduledTransactions from "../pages/ScheduledTransactions";
 import Transactions from "../pages/Transactions";
 import { AccountProvider } from "../contexts/AccountContext";
+import { CategoryProvider } from "../contexts/CategoryContext";
+import Categories from "../pages/Categories";
 
 function AppRoutes() {
   return (
@@ -23,7 +25,9 @@ function AppRoutes() {
         <Route
           element={
             <AccountProvider>
-              <Layout />
+              <CategoryProvider>
+                <Layout />
+              </CategoryProvider>
             </AccountProvider>
           }
         >
@@ -35,6 +39,7 @@ function AppRoutes() {
           />
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/budgets" element={<Budgets />} />
+          <Route path="/categories" element={<Categories />} />
         </Route>
       </Route>
     </Routes>
