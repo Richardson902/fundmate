@@ -4,7 +4,7 @@ import AccountItem from "./AccountItem";
 import EditAccountModal from "../modals/EditAccountModal";
 
 function AccountList({ variant = "full", itemLimit }) {
-  const { accounts, updateAccount, deleteAccount } = useAccounts();
+  const { accounts, updateAccount, deleteAccount, loading } = useAccounts();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [error, setError] = useState("");

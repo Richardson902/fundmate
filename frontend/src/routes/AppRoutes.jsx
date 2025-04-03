@@ -13,6 +13,7 @@ import Transactions from "../pages/Transactions";
 import { AccountProvider } from "../contexts/AccountContext";
 import { CategoryProvider } from "../contexts/CategoryContext";
 import Categories from "../pages/Categories";
+import { TransactionProvider } from "../contexts/TransactionContext";
 
 function AppRoutes() {
   return (
@@ -26,7 +27,9 @@ function AppRoutes() {
           element={
             <AccountProvider>
               <CategoryProvider>
-                <Layout />
+                <TransactionProvider>
+                  <Layout />
+                </TransactionProvider>
               </CategoryProvider>
             </AccountProvider>
           }

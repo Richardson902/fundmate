@@ -134,7 +134,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Revert the old transaction amount from account balance
         Account oldAccount = existingTransaction.getAccount();
-        oldAccount.setBalance(oldAccount.getBalance() - transactionRequest.getAmount());
+        oldAccount.setBalance(oldAccount.getBalance() - existingTransaction.getAmount());
         accountRepository.save(oldAccount);
 
         // Update transaction fields
@@ -146,7 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
         existingTransaction.setNote(transactionRequest.getNote());
 
         // Add new amount to account balance
-        newAccount.setBalance(newAccount.getBalance() - transactionRequest.getAmount());
+        newAccount.setBalance(newAccount.getBalance() + transactionRequest.getAmount());
         accountRepository.save(newAccount);
 
         Transaction updatedTransaction = transactionRepository.save(existingTransaction);
