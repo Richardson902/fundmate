@@ -34,7 +34,7 @@ public class TransactionSchedulerServiceImpl implements TransactionSchedulerServ
 
     @Override
     @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
-    public void processScheduledTransactions() {
+    public void ProcessScheduledTransactions() {
         LocalDate today = LocalDate.now();
         List<ScheduledTransaction> scheduledTransactions = scheduledTransactionRepository.findAll();
 
@@ -49,26 +49,20 @@ public class TransactionSchedulerServiceImpl implements TransactionSchedulerServ
 
     @Override
     public boolean isTransactionDue(ScheduledTransaction scheduledTransaction, LocalDate today) {
-        // If it has no more occurrences, it's not due
-        if (scheduledTransaction.getOccurrences() <= 0) {
+        if (scheduledTransaction.getExecutionDate().isAfter(today) || scheduledTransaction.getOccurrences() <= 0) {
             return false;
         }
 
-        // Check if today is the execution date or if it's overdue
-        if (!scheduledTransaction.getExecutionDate().isAfter(today)) {
-            long daysBetween = ChronoUnit.DAYS.between(scheduledTransaction.getExecutionDate(), today);
+        long daysBetween = ChronoUnit.DAYS.between(scheduledTransaction.getExecutionDate(), today);
 
-            return switch (scheduledTransaction.getRecurrenceType()) {
-                case DAILY -> daysBetween % scheduledTransaction.getRecurrenceInterval() == 0;
-                case WEEKLY -> daysBetween % (7L * scheduledTransaction.getRecurrenceInterval()) == 0;
-                case MONTHLY -> scheduledTransaction.getExecutionDate().getDayOfMonth() == today.getDayOfMonth() &&
-                        daysBetween >= 28L * scheduledTransaction.getRecurrenceInterval();
-                case YEARLY -> scheduledTransaction.getExecutionDate().getDayOfYear() == today.getDayOfYear() &&
-                        daysBetween >= 365L * scheduledTransaction.getRecurrenceInterval();
-            };
-        }
-
-        return false;
+        return switch (scheduledTransaction.getRecurrenceType()) {
+            case DAILY -> daysBetween % scheduledTransaction.getRecurrenceInterval() == 0;
+            case WEEKLY -> daysBetween % (7L * scheduledTransaction.getRecurrenceInterval()) == 0;
+            case MONTHLY -> scheduledTransaction.getExecutionDate().getDayOfMonth() == today.getDayOfMonth() &&
+                    daysBetween >= 28L * scheduledTransaction.getRecurrenceInterval();
+            case YEARLY -> scheduledTransaction.getExecutionDate().getDayOfYear() == today.getDayOfYear() &&
+                    daysBetween >= 365L * scheduledTransaction.getRecurrenceInterval();
+        };
     }
 
     @Override
@@ -84,25 +78,11 @@ public class TransactionSchedulerServiceImpl implements TransactionSchedulerServ
         Account account = scheduledTransaction.getAccount();
         account.setBalance(account.getBalance() + scheduledTransaction.getAmount());
 
-        accountRepository.save(account);
-        transactionRepository.save(transaction);
-
-        // Update the execution date for the next occurrence
-        LocalDate nextExecutionDate = calculateNextExecutionDate(scheduledTransaction);
-        scheduledTransaction.setExecutionDate(nextExecutionDate);
+        scheduledTransaction.setExecutionDate(LocalDate.now());
         scheduledTransactionRepository.save(scheduledTransaction);
 
-    }
-
-    private LocalDate calculateNextExecutionDate(ScheduledTransaction scheduledTransaction) {
-        LocalDate nextExecutionDate = scheduledTransaction.getExecutionDate();
-        nextExecutionDate = switch (scheduledTransaction.getRecurrenceType()) {
-            case DAILY -> nextExecutionDate.plusDays(scheduledTransaction.getRecurrenceInterval());
-            case WEEKLY -> nextExecutionDate.plusWeeks(scheduledTransaction.getRecurrenceInterval());
-            case MONTHLY -> nextExecutionDate.plusMonths(scheduledTransaction.getRecurrenceInterval());
-            case YEARLY -> nextExecutionDate.plusYears(scheduledTransaction.getRecurrenceInterval());
-        };
-        return nextExecutionDate;
+        accountRepository.save(account);
+        transactionRepository.save(transaction);
     }
 
     @Override
