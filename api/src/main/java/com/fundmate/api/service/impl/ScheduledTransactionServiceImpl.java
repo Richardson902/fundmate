@@ -11,6 +11,7 @@ import com.fundmate.api.repository.AccountRepository;
 import com.fundmate.api.repository.CategoryRepository;
 import com.fundmate.api.repository.ScheduledTransactionRepository;
 import com.fundmate.api.service.ScheduledTransactionService;
+import com.fundmate.api.service.TransactionSchedulerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,12 +28,14 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
     private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
     private final ScheduledTransactionMapper scheduledTransactionMapper;
+    private final TransactionSchedulerService transactionSchedulerService;
 
-    public ScheduledTransactionServiceImpl(ScheduledTransactionRepository scheduledTransactionRepository, AccountRepository accountRepository, CategoryRepository categoryRepository, ScheduledTransactionMapper scheduledTransactionMapper) {
+    public ScheduledTransactionServiceImpl(ScheduledTransactionRepository scheduledTransactionRepository, AccountRepository accountRepository, CategoryRepository categoryRepository, ScheduledTransactionMapper scheduledTransactionMapper, TransactionSchedulerService transactionSchedulerService) {
         this.scheduledTransactionRepository = scheduledTransactionRepository;
         this.accountRepository = accountRepository;
         this.categoryRepository = categoryRepository;
         this.scheduledTransactionMapper = scheduledTransactionMapper;
+        this.transactionSchedulerService = transactionSchedulerService;
     }
 
     private User getCurrentUser() {
@@ -60,6 +63,12 @@ public class ScheduledTransactionServiceImpl implements ScheduledTransactionServ
         scheduledTransaction.setCategory(category);
 
         ScheduledTransaction savedScheduledTransaction = scheduledTransactionRepository.save(scheduledTransaction);
+        
+        // Manually create transaction if due today on creation - think this will fix the issue
+        if (transactionSchedulerService.isTransactionDue(savedScheduledTransaction, LocalDate.now())) {
+            transactionSchedulerService.createTransaction(savedScheduledTransaction);
+            transactionSchedulerService.updateOccurrences(savedScheduledTransaction);
+        }
         return scheduledTransactionMapper.toResponse(savedScheduledTransaction);
     }
 
