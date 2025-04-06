@@ -1,14 +1,22 @@
-import { Pencil, Trash } from "react-bootstrap-icons";
+import { Trash } from "react-bootstrap-icons";
 import { useCategories } from "../contexts/CategoryContext";
 import { useAccounts } from "../contexts/AccountContext";
 
-function TransactionItem({ transaction, onEdit, onDelete, variant = "full" }) {
+function ScheduledTransactionItem({ transaction, onDelete, variant = "full" }) {
   const { categories } = useCategories();
   const { accounts } = useAccounts();
 
   const category = categories.find((c) => c.id === transaction.category.id);
   const account = accounts.find((a) => a.id === transaction.account.id);
-  const formattedDate = new Date(transaction.date).toLocaleDateString();
+  const formattedDate = new Date(
+    transaction.executionDate + "T00:00:00"
+  ).toLocaleDateString();
+
+  const getRecurrenceText = () => {
+    return `Every ${
+      transaction.recurrenceInterval
+    } ${transaction.recurrenceType.toLowerCase()}(s)`;
+  };
 
   if (variant === "dashboard") {
     return (
@@ -53,6 +61,7 @@ function TransactionItem({ transaction, onEdit, onDelete, variant = "full" }) {
           <div>
             <div>{transaction.fromName || category?.categoryName}</div>
             <div className="small text-muted">{account?.accountName}</div>
+            <div className="small text-muted">{getRecurrenceText()}</div>
             {transaction.note && (
               <div className="small text-muted">{transaction.note}</div>
             )}
@@ -64,16 +73,11 @@ function TransactionItem({ transaction, onEdit, onDelete, variant = "full" }) {
           >
             ${Math.abs(transaction.amount).toFixed(2)}
           </div>
-          <div className="small text-muted">{formattedDate}</div>
+          <div className="small text-muted">Next: {formattedDate}</div>
+          <div className="small text-muted">
+            {transaction.occurrences} occurrence(s)
+          </div>
           <div className="d-flex gap-2 mt-2">
-            {onEdit && (
-              <button
-                onClick={onEdit}
-                className="btn btn-link p-0 text-primary"
-              >
-                <Pencil size={16} />
-              </button>
-            )}
             {onDelete && (
               <button
                 onClick={onDelete}
@@ -89,4 +93,4 @@ function TransactionItem({ transaction, onEdit, onDelete, variant = "full" }) {
   );
 }
 
-export default TransactionItem;
+export default ScheduledTransactionItem;

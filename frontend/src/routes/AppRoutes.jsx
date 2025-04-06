@@ -14,6 +14,7 @@ import { AccountProvider } from "../contexts/AccountContext";
 import { CategoryProvider } from "../contexts/CategoryContext";
 import Categories from "../pages/Categories";
 import { TransactionProvider } from "../contexts/TransactionContext";
+import { ScheduledTransactionProvider } from "../contexts/ScheduledTransactionContext";
 
 function AppRoutes() {
   return (
@@ -28,7 +29,9 @@ function AppRoutes() {
             <AccountProvider>
               <CategoryProvider>
                 <TransactionProvider>
-                  <Layout />
+                  <ScheduledTransactionProvider>
+                    <Layout />
+                  </ScheduledTransactionProvider>
                 </TransactionProvider>
               </CategoryProvider>
             </AccountProvider>

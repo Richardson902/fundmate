@@ -92,7 +92,9 @@ export function TransactionProvider({ children }) {
   };
 
   useEffect(() => {
-    loadAllTransactions();
+    if (accounts.length > 0) {
+      loadAllTransactions();
+    }
   }, [accounts]);
 
   const value = {
