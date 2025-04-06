@@ -67,6 +67,7 @@ export function TransactionProvider({ children }) {
         id,
         transactionData
       );
+      await loadAccounts();
       setTransactions(
         transactions.map((trans) =>
           trans.id === id ? updatedTransaction : trans
@@ -83,6 +84,7 @@ export function TransactionProvider({ children }) {
     try {
       setLoading(true);
       await transactionService.deleteTransaction(id);
+      await loadAccounts();
       setTransactions(transactions.filter((trans) => trans.id !== id));
     } catch (error) {
       setError(error.message);
