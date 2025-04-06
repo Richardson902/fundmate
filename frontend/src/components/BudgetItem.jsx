@@ -10,6 +10,11 @@ function BudgetItem({ budget, onDelete, variant = "full" }) {
   const category = categories.find((c) => c.id === budget.category.id);
   const account = accounts.find((a) => a.id === budget.account.id);
 
+  // Convert positive amounts into negative
+  const spentAmount = -budget.spentAmount;
+  const completionPercentage = (spentAmount / budget.amount) * 100;
+  const residualAmount = budget.amount - spentAmount;
+
   const progressVariant = () => {
     if (budget.completionPercentage >= 100) return "danger";
     if (budget.completionPercentage >= 75) return "warning";
@@ -74,18 +79,18 @@ function BudgetItem({ budget, onDelete, variant = "full" }) {
                 budget.spentAmount > budget.amount ? "text-danger" : ""
               }
             >
-              ${budget.spentAmount.toFixed(2)}
+              ${spentAmount.toFixed(2)}
             </span>
             <span className="text-muted"> of ${budget.amount.toFixed(2)}</span>
           </div>
           <div className="small text-muted">
-            Remaining: ${budget.residualAmount.toFixed(2)}
+            Remaining: ${residualAmount.toFixed(2)}
           </div>
           <div className="mt-2">
             <ProgressBar
               variant={progressVariant()}
-              now={budget.completionPercentage}
-              label={`${budget.completionPercentage.toFixed(0)}%`}
+              now={completionPercentage}
+              label={`${completionPercentage.toFixed(0)}%`}
             />
           </div>
           <div className="d-flex justify-content-end mt-2">
