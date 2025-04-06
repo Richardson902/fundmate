@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus } from "react-bootstrap-icons";
 import AddBudgetModal from "../modals/AddBudgetModal";
 import { useBudgets } from "../contexts/BudgetContext";
+import BudgetList from "../components/BudgetList";
 
 function Budgets() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -19,6 +20,7 @@ function Budgets() {
 
   return (
     <div className="container-fluid">
+      <BudgetList />
       <div
         className="position-fixed"
         style={{
