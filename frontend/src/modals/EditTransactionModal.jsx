@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import { useCategories } from "../contexts/CategoryContext";
 import { useAccounts } from "../contexts/AccountContext";
+import { useNavigate } from "react-router-dom";
 
 function EditTransactionModal({ show, onHide, transaction, onEdit }) {
   const { categories } = useCategories();
@@ -13,6 +14,7 @@ function EditTransactionModal({ show, onHide, transaction, onEdit }) {
   const [fromName, setFromName] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (transaction) {
@@ -98,6 +100,18 @@ function EditTransactionModal({ show, onHide, transaction, onEdit }) {
                 </option>
               ))}
             </Form.Select>
+            <div className="mt-1">
+              <button
+                className="btn btn-link p-0 small text-primary text-decoration-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onHide();
+                  navigate("/categories");
+                }}
+              >
+                Add new category
+              </button>
+            </div>
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Account</Form.Label>

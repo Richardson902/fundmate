@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import { useCategories } from "../contexts/CategoryContext";
 import { useAccounts } from "../contexts/AccountContext";
+import { useNavigate } from "react-router-dom";
 
 function AddExpenseModal({ show, onHide, onAdd }) {
   const { categories } = useCategories();
@@ -13,6 +14,7 @@ function AddExpenseModal({ show, onHide, onAdd }) {
   const [fromName, setFromName] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,6 +86,18 @@ function AddExpenseModal({ show, onHide, onAdd }) {
                 </option>
               ))}
             </Form.Select>
+            <div className="mt-1">
+              <button
+                className="btn btn-link p-0 small text-primary text-decoration-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onHide();
+                  navigate("/categories");
+                }}
+              >
+                Add new category
+              </button>
+            </div>
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Account</Form.Label>

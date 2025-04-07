@@ -9,16 +9,18 @@ function AccountItem({ account, onEdit, onDelete, variant = "full" }) {
 
   if (variant === "dashboard") {
     return (
-      <Card className="mb-2">
-        <Card.Body className="py-2">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 className="mb-0 small">{account.accountName}</h6>
-            </div>
-            <span className="text-primary small">{formattedBalance}</span>
+      <div className="p-3">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <div className="fw-medium">{account.accountName}</div>
           </div>
-        </Card.Body>
-      </Card>
+          <span
+            className={account.balance < 0 ? "text-danger" : "text-success"}
+          >
+            {formattedBalance}
+          </span>
+        </div>
+      </div>
     );
   }
 

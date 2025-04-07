@@ -30,14 +30,20 @@ function AccountList({ variant = "full", itemLimit }) {
       : accounts;
 
     return (
-      <div className="list-group">
-        {displayedAccounts.map((account) => (
-          <div key={account.id} className="list-group-item">
-            <div className="d-flex justify-content-between align-items-center">
-              <h6 className="mb-0">{account.accountName}</h6>
-              <span>${account.balance.toLocaleString()}</span>
-            </div>
-          </div>
+      <div className="p-0">
+        {displayedAccounts.map((account, index) => (
+          <>
+            <AccountItem
+              key={account.id}
+              account={account}
+              variant="dashboard"
+            />
+            {index < displayedAccounts.length - 1 && (
+              <div className="d-flex justify-content-center">
+                <hr className="my-0 opacity-25 w-90" style={{ width: "99%" }} />
+              </div>
+            )}
+          </>
         ))}
       </div>
     );

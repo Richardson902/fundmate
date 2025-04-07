@@ -4,7 +4,7 @@ import { useBudgets } from "../contexts/BudgetContext";
 import BudgetItem from "./BudgetItem";
 
 function BudgetList({ variant = "full", accountId, itemLimit }) {
-  const { budgets, loading, loadAllBudgets, deleteBudgets } = useBudgets();
+  const { budgets, loading, loadAllBudgets, deleteBudget } = useBudgets();
 
   const [error, setError] = useState("");
 
@@ -22,7 +22,7 @@ function BudgetList({ variant = "full", accountId, itemLimit }) {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this budget?")) {
       try {
-        await deleteBudgets(id);
+        await deleteBudget(id);
       } catch (error) {
         setError(error.message);
       }
@@ -59,6 +59,7 @@ function BudgetList({ variant = "full", accountId, itemLimit }) {
                   <BudgetItem
                     budget={budget}
                     onDelete={() => handleDelete(budget.id)}
+                    variant={variant}
                   />
                   {index < budgets.length - 1 && <hr className="my-0" />}
                 </div>

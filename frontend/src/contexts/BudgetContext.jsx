@@ -38,7 +38,7 @@ export function BudgetProvider({ children }) {
     } catch (error) {
       setError(error.message);
     } finally {
-      setLoading(true);
+      setLoading(false);
     }
   };
 

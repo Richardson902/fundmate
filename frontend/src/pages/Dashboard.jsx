@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { ThreeDotsVertical } from "react-bootstrap-icons";
 import AccountList from "../components/AccountList";
 import TransactionList from "../components/TransactionList";
 import BudgetList from "../components/BudgetList";
 import DashboardListSettingsModal from "../modals/DashboardListSettingsModal";
+import MonthlyTransactionChart from "../components/MonthlyTransactionChart";
+import DashboardSummary from "../components/DashboardSummary";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -31,9 +34,17 @@ function Dashboard() {
   };
 
   return (
-    <div className="container-fluid">
-      <div className="card mb-4">
-        <div className="card-header bg-white">
+    <div className="container-fluid px-4">
+      <div className="row mb-4">
+        <div className="col-md-6">
+          <DashboardSummary />
+        </div>
+        <div className="col-md-6">
+          <MonthlyTransactionChart />
+        </div>
+      </div>
+      <Card className="mb-4">
+        <Card.Header className="bg-white border-bottom-0">
           <div className="d-flex justify-content-between align-items-center">
             <h5 className="mb-0">Accounts</h5>
             <button
@@ -43,19 +54,19 @@ function Dashboard() {
               <ThreeDotsVertical />
             </button>
           </div>
-        </div>
+        </Card.Header>
         <div
           onClick={() => navigate("/accounts")}
           style={{ cursor: "pointer" }}
         >
           <AccountList variant="dashboard" itemLimit={accountsToShow} />
         </div>
-      </div>
+      </Card>
 
-      <div className="card mb-4">
-        <div className="card-header bg-white">
+      <Card className="mb-4">
+        <Card.Header className="bg-white border-bottom-0">
           <div className="d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">Recent Transactions</h5>
+            <h5 className="mb-0">Transactions</h5>
             <button
               className="btn btn-link p-0 text-dark"
               onClick={() => setShowTransactionSettings(true)}
@@ -63,14 +74,14 @@ function Dashboard() {
               <ThreeDotsVertical />
             </button>
           </div>
-        </div>
+        </Card.Header>
         <div
           onClick={() => navigate("/transactions")}
           style={{ cursor: "pointer" }}
         >
           <TransactionList variant="dashboard" itemLimit={transactionsToShow} />
         </div>
-      </div>
+      </Card>
 
       <div className="card mb-4">
         <div className="card-header bg-white">

@@ -54,17 +54,13 @@ function TransactionList({ variant = "full", accountId, itemLimit }) {
   if (variant === "dashboard") {
     const recentTransactions = transactions.slice(0, itemLimit || 5);
     return (
-      <Card>
-        <Card.Body className="p-0">
-          {recentTransactions.map((transaction) => (
-            <TransactionItem
-              key={transaction.id}
-              transaction={transaction}
-              variant="dashboard"
-            />
-          ))}
-        </Card.Body>
-      </Card>
+      <div className="p-0">
+        {recentTransactions.map((transaction, index) => (
+          <div key={transaction.id}>
+            <TransactionItem transaction={transaction} variant="dashboard" />
+          </div>
+        ))}
+      </div>
     );
   }
 

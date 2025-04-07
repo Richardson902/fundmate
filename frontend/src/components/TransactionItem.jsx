@@ -15,26 +15,31 @@ function TransactionItem({ transaction, onEdit, onDelete, variant = "full" }) {
   if (variant === "dashboard") {
     return (
       <div className="p-3">
-        <div className="d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
+        <div className="d-flex justify-content-between align-items-start">
+          <div className="d-flex align-items-start">
             {category && (
               <img
                 src={`/icons/${category.icon}.png`}
                 alt={category.categoryName}
-                style={{ width: "24px", height: "24px" }}
+                style={{ width: "48px", height: "48px" }}
                 className="me-2"
               />
             )}
             <div>
-              <div className="small text-muted">{formattedDate}</div>
               <div>{transaction.fromName || category?.categoryName}</div>
+              <div className="small text-muted">{account?.accountName}</div>
             </div>
           </div>
-          <span
-            className={transaction.amount < 0 ? "text-danger" : "text-success"}
-          >
-            ${Math.abs(transaction.amount).toFixed(2)}
-          </span>
+          <div className="text-end">
+            <div
+              className={
+                transaction.amount < 0 ? "text-danger" : "text-success"
+              }
+            >
+              ${Math.abs(transaction.amount).toFixed(2)}
+            </div>
+            <div className="small text-muted">{formattedDate}</div>
+          </div>
         </div>
       </div>
     );
