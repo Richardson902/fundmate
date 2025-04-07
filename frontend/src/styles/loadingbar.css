@@ -1,0 +1,32 @@
+.loading-bar-container {
+  position: fixed;
+  top: var(--navbar-height, 56px);
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 998; /* Below sidebar (999) and navbar (1000) */
+  background-color: transparent;
+}
+
+.loading-bar {
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    #007bff 20%,
+    #007bff 80%,
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: loading 2s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

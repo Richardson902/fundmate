@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { budgetService } from "../services/budget.service";
 import { useAccounts } from "./AccountContext";
+import { useLoading } from "./LoadingContext";
 
 const BudgetContext = createContext();
 
 export function BudgetProvider({ children }) {
   const [budgets, setBudgets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { setLoading } = useLoading();
   const [error, setError] = useState("");
   const { accounts } = useAccounts();
 
@@ -62,7 +63,6 @@ export function BudgetProvider({ children }) {
 
   const value = {
     budgets,
-    loading,
     error,
     loadAllBudgets,
     addBudget,

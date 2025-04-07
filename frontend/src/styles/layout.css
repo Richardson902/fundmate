@@ -3,7 +3,7 @@
   position: fixed;
   left: 0;
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 999;
   background-color: var(--fm-bg-secondary);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -43,6 +43,7 @@
   background-color: var(--fm-primary) !important;
   border-bottom: 1px solid var(--fm-primary);
   color: white;
+  z-index: 1000;
 }
 
 .top-navbar .navbar-brand {

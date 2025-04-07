@@ -16,6 +16,7 @@ import Categories from "../pages/Categories";
 import { TransactionProvider } from "../contexts/TransactionContext";
 import { ScheduledTransactionProvider } from "../contexts/ScheduledTransactionContext";
 import { BudgetProvider } from "../contexts/BudgetContext";
+import { LoadingProvider } from "../contexts/LoadingContext";
 
 function AppRoutes() {
   return (
@@ -27,17 +28,19 @@ function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route
           element={
-            <AccountProvider>
-              <CategoryProvider>
-                <TransactionProvider>
-                  <ScheduledTransactionProvider>
-                    <BudgetProvider>
-                      <Layout />
-                    </BudgetProvider>
-                  </ScheduledTransactionProvider>
-                </TransactionProvider>
-              </CategoryProvider>
-            </AccountProvider>
+            <LoadingProvider>
+              <AccountProvider>
+                <CategoryProvider>
+                  <TransactionProvider>
+                    <ScheduledTransactionProvider>
+                      <BudgetProvider>
+                        <Layout />
+                      </BudgetProvider>
+                    </ScheduledTransactionProvider>
+                  </TransactionProvider>
+                </CategoryProvider>
+              </AccountProvider>
+            </LoadingProvider>
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />

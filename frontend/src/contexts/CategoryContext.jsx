@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { categoryService } from "../services/category.service";
+import { useLoading } from "./LoadingContext";
 
 const CategoryContext = createContext();
 
 export function CategoryProvider({ children }) {
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { setLoading } = useLoading();
   const [error, setError] = useState("");
 
   const loadCategories = async () => {
@@ -28,7 +29,7 @@ export function CategoryProvider({ children }) {
     } catch (error) {
       setError(error.message);
     } finally {
-      setLoading(false);
+      setLoading(true);
     }
   };
 
@@ -50,7 +51,6 @@ export function CategoryProvider({ children }) {
 
   const value = {
     categories,
-    loading,
     error,
     addCategory,
     deleteCategory,

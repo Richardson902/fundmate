@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { accountService } from "../services/account.service";
+import { useLoading } from "./LoadingContext";
 
 const AccountContext = createContext();
 
 export function AccountProvider({ children }) {
   const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const { setLoading } = useLoading();
   const loadAccounts = async () => {
     try {
       setLoading(true);
@@ -70,7 +70,6 @@ export function AccountProvider({ children }) {
     <AccountContext.Provider
       value={{
         accounts,
-        loading,
         error,
         loadAccounts,
         addAccount,

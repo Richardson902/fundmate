@@ -8,7 +8,7 @@ function CategoryItem({ category, onDelete }) {
           <img
             src={`/icons/${category.icon}.png`}
             alt={category.icon}
-            style={{ width: "24px", height: "24px" }}
+            style={{ width: "48px", height: "48px" }}
             className="me-2"
           />
           <h6 className="mb-0">{category.categoryName}</h6>

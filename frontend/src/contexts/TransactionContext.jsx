@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { transactionService } from "../services/transaction.service";
 import { useAccounts } from "../contexts/AccountContext";
+import { useLoading } from "./LoadingContext";
 
 const TransactionContext = createContext();
 
 export function TransactionProvider({ children }) {
   const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { setLoading } = useLoading();
   const [error, setError] = useState("");
   const { accounts, loadAccounts } = useAccounts();
 
@@ -101,7 +102,6 @@ export function TransactionProvider({ children }) {
 
   const value = {
     transactions,
-    loading,
     error,
     loadAllTransactions,
     loadTransactionsByAccount,

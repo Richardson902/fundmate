@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { scheduledTransactionService } from "../services/schedule.service";
 import { useAccounts } from "./AccountContext";
+import { useLoading } from "../contexts/LoadingContext";
 
 const ScheduledTransactionContext = createContext();
 
 export function ScheduledTransactionProvider({ children }) {
   const [scheduledTransactions, setScheduledTransactions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { setLoading } = useLoading();
   const { accounts, loadAccounts } = useAccounts();
   const [error, setError] = useState("");
 
@@ -72,7 +73,6 @@ export function ScheduledTransactionProvider({ children }) {
 
   const value = {
     scheduledTransactions,
-    loading,
     error,
     loadAllScheduledTransactions,
     addScheduledTransaction,

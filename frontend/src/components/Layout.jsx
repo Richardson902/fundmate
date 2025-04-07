@@ -6,7 +6,17 @@ import "../styles/layout.css";
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+  const [navbarHeight, setNavbarHeight] = useState(0);
   const location = useLocation();
+
+  const handleNavbarHeight = (height) => {
+    setNavbarHeight(height);
+    // Update CSS variable
+    document.documentElement.style.setProperty(
+      "--navbar-height",
+      `${height}px`
+    );
+  };
 
   useEffect(() => {
     if (window.innerWidth <= 768) {
@@ -33,8 +43,14 @@ function Layout() {
     <div className="d-flex">
       <Sidebar isOpen={isSidebarOpen} />
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
-        <TopNavbar toggleSidebar={toggleSidebar} />
-        <div className="container-fluid p-4">
+        <TopNavbar
+          toggleSidebar={toggleSidebar}
+          onHeightChange={handleNavbarHeight}
+        />
+        <div
+          className="container-fluid p-4"
+          style={{ marginTop: `${navbarHeight}px` }}
+        >
           <Outlet />
         </div>
       </div>
