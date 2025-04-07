@@ -4,7 +4,7 @@ import { useBudgets } from "../contexts/BudgetContext";
 import BudgetItem from "./BudgetItem";
 
 function BudgetList({ variant = "full", accountId, itemLimit }) {
-  const { budgets, loading, loadAllBudgets, deleteBudget } = useBudgets();
+  const { budgets, loadAllBudgets, deleteBudget } = useBudgets();
 
   const [error, setError] = useState("");
 
@@ -28,8 +28,6 @@ function BudgetList({ variant = "full", accountId, itemLimit }) {
       }
     }
   };
-
-  if (loading) return <div>Loading...</div>;
 
   if (variant === "dashboard") {
     const activeBudgets = budgets

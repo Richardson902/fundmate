@@ -5,10 +5,8 @@ import CategoryList from "../components/CategoryList";
 import AddCategoryModal from "../modals/AddCategoryModal";
 
 function Categories() {
-  const { categories, addCategory, loading, error } = useCategories();
+  const { categories, addCategory, error } = useCategories();
   const [showAddModal, setShowAddModal] = useState(false);
-
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="container-fluid">

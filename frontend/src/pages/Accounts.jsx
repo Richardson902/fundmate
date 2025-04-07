@@ -6,14 +6,12 @@ import AccountSummary from "../components/AccountSummary";
 import AddAccountModal from "../modals/AddAccountModal";
 
 function Accounts() {
-  const { accounts, addAccount, loading, error } = useAccounts();
+  const { accounts, addAccount, error } = useAccounts();
   const [showAddModal, setShowAddModal] = useState(false);
 
   const getTotalBalance = () => {
     return accounts.reduce((sum, account) => sum + account.balance, 0);
   };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="container-fluid">

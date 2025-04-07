@@ -7,7 +7,6 @@ import EditTransactionModal from "../modals/EditTransactionModal";
 function TransactionList({ variant = "full", accountId, itemLimit }) {
   const {
     transactions,
-    loading,
     loadAllTransactions,
     loadTransactionsByAccount,
     deleteTransaction,
@@ -16,7 +15,7 @@ function TransactionList({ variant = "full", accountId, itemLimit }) {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // set errors later
 
   useEffect(() => {
     const loadTransactions = async () => {
@@ -47,8 +46,6 @@ function TransactionList({ variant = "full", accountId, itemLimit }) {
       }
     }
   };
-
-  if (loading) return <div>Loading...</div>;
 
   // Will fix later
   if (variant === "dashboard") {

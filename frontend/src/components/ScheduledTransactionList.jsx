@@ -6,7 +6,6 @@ import ScheduledTransactionItem from "./ScheduledTransactionItem";
 function ScheduledTransactionList({ variant = "full" }) {
   const {
     scheduledTransactions,
-    loading,
     loadAllScheduledTransactions,
     deleteScheduledTransaction,
   } = useScheduledTransactions();
@@ -37,8 +36,6 @@ function ScheduledTransactionList({ variant = "full" }) {
       }
     }
   };
-
-  if (loading) return <div>Loading...</div>;
 
   if (variant === "dashboard") {
     const recentTransactions = transactions.slice(0, 5);
