@@ -3,7 +3,7 @@ import { Card } from "react-bootstrap";
 import { useBudgets } from "../contexts/BudgetContext";
 import BudgetItem from "./BudgetItem";
 
-function BudgetList({ variant = "full", accountId }) {
+function BudgetList({ variant = "full", accountId, itemLimit }) {
   const { budgets, loading, loadAllBudgets, deleteBudgets } = useBudgets();
 
   const [error, setError] = useState("");
@@ -34,7 +34,8 @@ function BudgetList({ variant = "full", accountId }) {
   if (variant === "dashboard") {
     const activeBudgets = budgets
       .filter((budget) => budget.completionPercentage < 100)
-      .slice(0, 5);
+      .sort((a, b) => b.completionPercentage - a.completionPercentage)
+      .slice(0, itemLimit || 3);
 
     return (
       <Card>

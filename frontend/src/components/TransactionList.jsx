@@ -4,7 +4,7 @@ import { useTransactions } from "../contexts/TransactionContext";
 import TransactionItem from "./TransactionItem";
 import EditTransactionModal from "../modals/EditTransactionModal";
 
-function TransactionList({ variant = "full", accountId }) {
+function TransactionList({ variant = "full", accountId, itemLimit }) {
   const {
     transactions,
     loading,
@@ -52,7 +52,7 @@ function TransactionList({ variant = "full", accountId }) {
 
   // Will fix later
   if (variant === "dashboard") {
-    const recentTransactions = transactions.slice(0, 5);
+    const recentTransactions = transactions.slice(0, itemLimit || 5);
     return (
       <Card>
         <Card.Body className="p-0">

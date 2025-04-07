@@ -16,8 +16,8 @@ function BudgetItem({ budget, onDelete, variant = "full" }) {
   const residualAmount = budget.amount - spentAmount;
 
   const progressVariant = () => {
-    if (budget.completionPercentage >= 100) return "danger";
-    if (budget.completionPercentage >= 75) return "warning";
+    if (completionPercentage >= 100) return "danger";
+    if (completionPercentage >= 75) return "warning";
     return "success";
   };
 
@@ -38,14 +38,14 @@ function BudgetItem({ budget, onDelete, variant = "full" }) {
           </div>
           <div className="text-end">
             <div>
-              ${budget.spentAmount.toFixed(2)} / ${budget.amount.toFixed(2)}
+              ${spentAmount.toFixed(2)} / ${budget.amount.toFixed(2)}
             </div>
           </div>
         </div>
         <ProgressBar
           variant={progressVariant()}
-          now={budget.completionPercentage}
-          label={`${budget.completionPercentage.toFixed(0)}%`}
+          now={completionPercentage}
+          label={`${completionPercentage.toFixed(0)}%`}
         />
       </div>
     );

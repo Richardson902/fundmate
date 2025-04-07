@@ -8,7 +8,9 @@ function TransactionItem({ transaction, onEdit, onDelete, variant = "full" }) {
 
   const category = categories.find((c) => c.id === transaction.category.id);
   const account = accounts.find((a) => a.id === transaction.account.id);
-  const formattedDate = new Date(transaction.date).toLocaleDateString();
+  const formattedDate = new Date(
+    transaction.date + "T00:00:00"
+  ).toLocaleDateString();
 
   if (variant === "dashboard") {
     return (
