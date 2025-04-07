@@ -3,8 +3,7 @@ import RegisterForm from "../components/RegisterForm";
 
 function Register() {
   return (
-    <div>
-      <h1>Register</h1>
+    <div className="min-vh-100 d-flex align-items-center bg-light">
       <RegisterForm />
     </div>
   );
