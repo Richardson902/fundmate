@@ -15,6 +15,7 @@ FundMate is a full-stack personal finance management application that helps user
 ## Technologies Used
 
 ### Stack
+
 - React
 - Spring
 - PostgreSQL
@@ -22,6 +23,7 @@ FundMate is a full-stack personal finance management application that helps user
 - Nginx
 
 ### Libraries and Tools
+
 - React Router
 - Axios
 - JWT (JSON Web Tokens)
@@ -33,6 +35,7 @@ FundMate is a full-stack personal finance management application that helps user
 ## Getting Started
 
 ### Prerequisites
+
 Before getting started, make sure you have the following installed
 
 - Docker
@@ -41,29 +44,37 @@ Before getting started, make sure you have the following installed
 ### Installation
 
 1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/Richardson902/fundmate
 cd fundmate
 ```
 
 2. **Configure environment variables:**
+
 - Create `.env.api` file
+
 ```bash
 cp .env.example .env.
 ```
+
 - Create `.env.data` file
+
 ```bash
 cp .end.example.data .env.data
 ```
+
 You can update the variables in .env.api and .env.data to secure your application or leave them as default if you're just testing.
 
 3. **Build and run with Docker Compose:**
+
 ```bash
 docker compose up --build
 ```
 
 4. **Access the application:**
-Once the docker containers are up and running, you can access the following URLs:
+   Once the docker containers are up and running, you can access the following URLs:
+
 - **Development version:** `http://localhost:5173`
 - **Production version:** `http://localhost:8085`
 - **Database:** `http://localhost:5432`
@@ -88,11 +99,12 @@ Once the docker containers are up and running, you can access the following URLs
 - [ ] Category type flag (expense/income)
 - [ ] Monthly overviews
 - [ ] General backend improvements
+- [ ] Update scheduling execution to be more robust
 
 ## Security
+
 - Spring Security
 - JWT-based authentication
 - Password encryption
 - Protected API endpoints
 - Input validation and sanitization
-
